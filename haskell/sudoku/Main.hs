@@ -1,8 +1,7 @@
 import Prelude
 import Sudoku (solve)
 import System.Environment (getArgs)
-import Control.Parallel.Strategies (rpar, rseq, runEval)
-import Control.DeepSeq (force)
+import Control.Parallel.Strategies (rpar, runEval, Eval)
 import Data.Maybe (isJust)
 
 
@@ -12,12 +11,13 @@ main = do
   file <- readFile f
 
   let puzzles = lines file
-      (as, bs) = splitAt (length puzzles `div` 2) puzzles
-      solutions = runEval $ do
-                    as' <- rpar (force (map solve as))
-                    bs' <- rpar (force (map solve bs))
-                    _ <- rseq as'
-                    _ <- rseq bs'
-                    return (as' ++ bs')
-
+      solutions = runEval $ parMap solve puzzles
   print (length (filter isJust solutions))
+
+-- A parallel version of map, dynamically creating sparks for each item
+parMap :: (a -> b) -> [a] -> Eval [b]
+parMap _ [] = return []
+parMap f (a:as) = do
+  b <- rpar (f a)
+  bs <- parMap f as
+  return (b:bs)
