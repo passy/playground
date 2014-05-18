@@ -1,8 +1,9 @@
-import Sudoku
-import System.Environment
-import Control.Parallel.Strategies
-import Control.DeepSeq
-import Data.Maybe
+import Prelude
+import Sudoku (solve)
+import System.Environment (getArgs)
+import Control.Parallel.Strategies (rpar, rseq, runEval)
+import Control.DeepSeq (force)
+import Data.Maybe (isJust)
 
 
 main :: IO ()
