@@ -1,5 +1,6 @@
 import Prelude
 import Numeric
+import Data.Array
 import Control.Monad (liftM)
 import Text.ParserCombinators.Parsec hiding (spaces)
 import System.Environment
@@ -11,13 +12,8 @@ data LispVal = Atom String
              | String String
              | Bool Bool
              | Character Char
+             | Vector (Array Int LispVal)
     deriving Show
-
-symbol :: Parser Char
-symbol = oneOf "!$%&|*+-/:<=>?@^_~"
-
-spaces :: Parser ()
-spaces = skipMany1 space
 
 oct2dig :: (Num a, Eq a) => String -> a
 oct2dig x = fst $ readOct x !! 0
@@ -34,6 +30,12 @@ bin2dig = bin2dig' 0
                 old = 2 * digint + (if x == '0' then 0 else 1)
             in
                 bin2dig' old xs
+
+symbol :: Parser Char
+symbol = oneOf "!$%&|*+-/:<=>?@^_~"
+
+spaces :: Parser ()
+spaces = skipMany1 space
 
 escapedChars :: Parser Char
 escapedChars = do
@@ -106,12 +108,41 @@ parseBool = do
     _ <- char '#'
     ((char 't' >> return (Bool True)) <|> (char 'f' >> return (Bool True)))
 
+parseList :: Parser LispVal
+parseList = liftM List $ sepBy parseExpr spaces
+
+parseDottedList :: Parser LispVal
+parseDottedList = do
+    head' <- endBy parseExpr spaces
+    tail' <- char '.' >> spaces >> parseExpr
+    return $ DottedList head' tail'
+
+parseQuoted :: Parser LispVal
+parseQuoted = do
+    _ <- char '\''
+    x <- parseExpr
+    return $ List [Atom "quote", x]
+
+parseVector :: Parser LispVal
+parseVector = do
+    _ <- string "#("
+    arrayValues <- sepBy parseExpr spaces
+    _ <- char ')'
+    return $ Vector (listArray (0, (length arrayValues - 1)) arrayValues)
+
 parseExpr :: Parser LispVal
 parseExpr = parseAtom
     <|> parseString
     <|> try parseNumber
     <|> try parseBool
     <|> try parseCharacter
+    <|> parseQuoted
+    <|> try parseVector
+    <|> do
+        _ <- char '('
+        x <- try parseList <|> parseDottedList
+        _ <- char ')'
+        return x
 
 main :: IO ()
 main = do
