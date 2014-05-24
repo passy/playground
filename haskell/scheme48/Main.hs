@@ -13,7 +13,20 @@ data LispVal = Atom String
              | Bool Bool
              | Character Char
              | Vector (Array Int LispVal)
-    deriving Show
+
+instance Show LispVal where
+    show (String contents) = "\"" ++ contents ++ "\""
+    show (Atom name) = name
+    show (Number contents) = show contents
+    show (Bool True) = "#t"
+    show (Bool False) = "#f"
+    show (List contents) = "(" ++ unwordsList contents ++ ")"
+    show (DottedList head' tail') = "(" ++ unwordsList head' ++ " . " ++ show tail' ++ ")"
+    show (Character char') = show char'
+    show (Vector contents) = "#(" ++ show contents ++ ")"
+
+unwordsList :: [LispVal] -> String
+unwordsList = unwords . map show
 
 oct2dig :: (Num a, Eq a) => String -> a
 oct2dig x = fst $ readOct x !! 0
