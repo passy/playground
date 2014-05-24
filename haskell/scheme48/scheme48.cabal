@@ -15,7 +15,6 @@ executable scheme48
                        parsec
   default-language:    Haskell2010
   Ghc-options:         -Wall
-                       -rtsopts -threaded
                        -O2
                        -fwarn-tabs
                        -fwarn-incomplete-record-updates
