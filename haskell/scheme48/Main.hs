@@ -78,26 +78,22 @@ parseDigital1 = many1 digit >>= (return . Number . read)
 parseDigital2 :: Parser LispVal
 parseDigital2 = do
     _ <- try $ string "#d"
-    x <- many1 digit
-    (return . Number . read) x
+    liftM (Number . read) (many1 digit)
 
 parseHex :: Parser LispVal
 parseHex = do
     _ <- try $ string "#x"
-    x <- many1 hexDigit
-    return $ Number (hex2dig x)
+    liftM (Number . hex2dig) (many1 hexDigit)
 
 parseOct :: Parser LispVal
 parseOct = do
     _ <- try $ string "#o"
-    x <- many1 octDigit
-    return $ Number (oct2dig x)
+    liftM (Number . oct2dig) (many1 octDigit)
 
 parseBin :: Parser LispVal
 parseBin = do
     _ <- try $ string "#b"
-    x <- many1 (oneOf "10")
-    return $ Number (bin2dig x)
+    liftM (Number . bin2dig) (many1 $ oneOf "10")
 
 parseCharacter :: Parser LispVal
 parseCharacter = do
