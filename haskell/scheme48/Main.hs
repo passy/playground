@@ -17,6 +17,18 @@ symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
 spaces :: Parser ()
 spaces = skipMany1 space
 
+escapedChars :: Parser Char
+escapedChars = do
+    _ <- char '\\'
+    s <- oneOf "\\\"nrt"
+    return $ case s of
+        '\\' -> s
+        '"' -> s
+        'n' -> '\n'
+        't' -> '\t'
+        'r' -> '\r'
+        _ -> error "Unmatched value"
+
 readExpr :: String -> String
 readExpr input = case parse parseExpr "lisp" input of
     Left err -> "No match: " ++ show err
@@ -25,7 +37,7 @@ readExpr input = case parse parseExpr "lisp" input of
 parseString :: Parser LispVal
 parseString = do
     _ <- char '"'
-    x <- many (noneOf "\"")
+    x <- many $ escapedChars <|> noneOf "\"\\"
     _ <- char '"'
     return $ String x
 
