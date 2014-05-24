@@ -62,10 +62,17 @@ escapedChars = do
         'r' -> '\r'
         _ -> error "Unmatched value"
 
-readExpr :: String -> String
+readExpr :: String -> LispVal
 readExpr input = case parse parseExpr "lisp" input of
-    Left err -> "No match: " ++ show err
-    Right val -> "Found value: " ++ show val
+    Left err -> String $ "No match: " ++ show err
+    Right val -> val
+
+eval :: LispVal -> LispVal
+eval val@(String _) = val
+eval val@(Number _) = val
+eval val@(Bool _) = val
+eval (List [Atom "quote", val]) = val
+eval _ = undefined
 
 parseString :: Parser LispVal
 parseString = do
@@ -134,6 +141,7 @@ parseQuoted :: Parser LispVal
 parseQuoted = do
     _ <- char '\''
     x <- parseExpr
+    -- Ugh, this is ugly. I hope this gets rectified later.
     return $ List [Atom "quote", x]
 
 parseVector :: Parser LispVal
@@ -158,6 +166,4 @@ parseExpr = parseAtom
         return x
 
 main :: IO ()
-main = do
-    args <- getArgs
-    putStrLn (readExpr (head args))
+main = getArgs >>= print . eval . readExpr . head
