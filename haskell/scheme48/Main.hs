@@ -1,3 +1,5 @@
+{-# LANGUAGE ExistentialQuantification #-}
+
 import Prelude
 import Numeric
 import Data.Array
@@ -22,6 +24,8 @@ data LispError = NumArgs Integer [LispVal]
                | NotFunction String String
                | UnboundVar String String
                | Default String
+
+data Unpacker = forall a. Eq a => AnyUnpacker (LispVal -> ThrowsError a)
 
 instance Show LispVal where
     show (String contents) = "\"" ++ contents ++ "\""
@@ -133,7 +137,13 @@ primitives = [
     ("string<?", strBoolBinop (<)),
     ("string>?", strBoolBinop (>)),
     ("string<=?", strBoolBinop (<=)),
-    ("string>=?", strBoolBinop (>=))]
+    ("string>=?", strBoolBinop (>=)),
+    ("car", car),
+    ("cdr", cdr),
+    ("cons", cons),
+    ("eq?", eqv),
+    ("eqv?", eqv),
+    ("equal?", equal)]
 
 numericBinop :: (Integer -> Integer -> Integer) -> [LispVal] -> ThrowsError LispVal
 numericBinop _ [] = throwError $ NumArgs 2 []
@@ -180,6 +190,13 @@ unpackNum (String n) =
 unpackNum (List [n]) = unpackNum n
 unpackNum notNum = throwError $ TypeMismatch "number" notNum
 
+unpackEquals :: LispVal -> LispVal -> Unpacker -> ThrowsError Bool
+unpackEquals a b (AnyUnpacker unpacker) = do
+        ua <- unpacker a
+        ub <- unpacker b
+        return $ ua == ub
+    `catchError` (const $ return False)
+
 trapError :: (MonadError e m, Show e) => m String -> m String
 trapError action = catchError action (return . show)
 
@@ -224,6 +241,16 @@ eqv [(List arg1), (List arg2)] =
                 Left _ -> False -- Cannot be reached.
 eqv [_, _] = return $ Bool False
 eqv badArgList = throwError $ NumArgs 2 badArgList
+
+equal :: [LispVal] -> ThrowsError LispVal
+equal [a, b] = do
+    primitiveEquals <- liftM or $ mapM (unpackEquals a b)
+                       [AnyUnpacker unpackNum,
+                        AnyUnpacker unpackStr,
+                        AnyUnpacker unpackBool]
+    eqvEquals <- eqv [a, b]
+    return $ Bool $ (primitiveEquals || let (Bool x) = eqvEquals in x)
+equal badArgList = throwError $ NumArgs 2 badArgList
 
 parseString :: Parser LispVal
 parseString = do
