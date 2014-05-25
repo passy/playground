@@ -1,7 +1,7 @@
 import Prelude
 import Numeric
 import Data.Array
-import Control.Monad (liftM)
+import Control.Monad.Error
 import Text.ParserCombinators.Parsec hiding (spaces)
 import System.Environment
 
@@ -14,6 +14,14 @@ data LispVal = Atom String
              | Character Char
              | Vector (Array Int LispVal)
 
+data LispError = NumArgs Integer [LispVal]
+               | TypeMismatch String LispVal
+               | Parser ParseError
+               | BadSpecialForm String LispVal
+               | NotFunction String String
+               | UnboundVar String String
+               | Default String
+
 instance Show LispVal where
     show (String contents) = "\"" ++ contents ++ "\""
     show (Atom name) = name
@@ -24,6 +32,23 @@ instance Show LispVal where
     show (DottedList head' tail') = "(" ++ unwordsList head' ++ " . " ++ show tail' ++ ")"
     show (Character char') = show char'
     show (Vector contents) = "#(" ++ show contents ++ ")"
+
+instance Show LispError where
+    show (UnboundVar message varname) = message ++ ": " ++ varname
+    show (BadSpecialForm message form) = message ++ ": " ++ show form
+    show (NotFunction message func) = message ++ ": " ++ show func
+    show (NumArgs expected found) = "Expected " ++ show expected
+        ++ " args; found values " ++ unwordsList found
+    show (TypeMismatch expected found) = "Invalid type: expected " ++ expected
+        ++ ", found " ++ show found
+    show (Parser parseErr) = "Parse error at " ++ show parseErr
+    show (Default parseErr) = "Unknown error: " ++ show parseErr
+
+instance Error LispError where
+    noMsg = Default "An error has occured"
+    strMsg = Default
+
+type ThrowsError = Either LispError
 
 unwordsList :: [LispVal] -> String
 unwordsList = unwords . map show
