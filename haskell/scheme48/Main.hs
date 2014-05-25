@@ -3,6 +3,7 @@
 import Prelude
 import Numeric
 import Data.Array
+import System.IO
 -- TODO: Use Control.Monad.Trans.Except instead
 import Control.Monad.Error
 import Text.ParserCombinators.Parsec hiding (spaces)
@@ -105,8 +106,9 @@ eval (List [Atom "quote", val]) = return val
 eval (List [Atom "if", prec, conseq, alt]) = do
     result <- eval prec
     case result of
+        Bool False -> eval alt
         Bool True -> eval conseq
-        _ -> eval alt
+        _ -> throwError $ TypeMismatch "bool" prec
 eval (List (Atom func : args)) = mapM eval args >>= apply func
 eval badForm = throwError $ BadSpecialForm "Unrecognized special form" badForm
 
@@ -343,8 +345,32 @@ parseExpr = parseAtom
         _ <- char ')'
         return x
 
+flushStr :: String -> IO ()
+flushStr str = putStr str >> hFlush stdout
+
+readPrompt :: String -> IO String
+readPrompt prompt = flushStr prompt >> getLine
+
+evalString :: String -> IO String
+evalString expr = return $ extractValue $ trapError (liftM show $ readExpr expr >>= eval)
+
+evalAndPrint :: String -> IO ()
+evalAndPrint expr = evalString expr >>= putStrLn
+
+until_ :: Monad m => (a -> Bool) -> m a -> (a -> m ()) -> m ()
+until_ pred' prompt action = do
+    result <- prompt
+    if pred' result
+        then return ()
+        else action result >> until_ pred' prompt action
+
+runRepl :: IO ()
+runRepl = until_ (== "quit") (readPrompt "Lisp>>> ") evalAndPrint
+
 main :: IO ()
 main = do
     args <- getArgs
-    evaled <- return $ liftM show $ readExpr (args !! 0) >>= eval
-    putStrLn $ extractValue $ trapError evaled
+    case length args of
+        0 -> runRepl
+        1 -> evalAndPrint $ args !! 0
+        _ -> putStrLn "Provide either 0 or 1 argument"
