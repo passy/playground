@@ -24,6 +24,8 @@ data LispVal = Atom String
                       vararg :: (Maybe String),
                       body :: [LispVal],
                       closure :: Env }
+             | IOFunc ([LispVal] -> IOThrowsError LispVal)
+             | Port Handle
 
 data LispError = NumArgs Integer [LispVal]
                | TypeMismatch String LispVal
@@ -52,6 +54,8 @@ instance Show LispVal where
                  closure = _ }) = "(lambda (" ++ unwords (map show args) ++ (case varargs of
                     Nothing -> ""
                     Just arg -> " . " ++ arg) ++ ") ...)"
+    show (Port _) = "<IO port>"
+    show (IOFunc _) = "<IO primitive>"
 
 instance Show LispError where
     show (UnboundVar message varname) = message ++ ": " ++ varname
@@ -156,9 +160,10 @@ escapedChars = do
         _ -> error "Unmatched value"
 
 readExpr :: String -> ThrowsError LispVal
-readExpr input = case parse parseExpr "lisp" input of
-    Left err -> throwError $ Parser err
-    Right val -> return val
+readExpr = readOrThrow parseExpr
+
+readExprList :: String -> ThrowsError [LispVal]
+readExprList = readOrThrow (endBy parseExpr spaces)
 
 eval :: Env -> LispVal -> IOThrowsError LispVal
 eval _ val@(String _) = return val
@@ -208,7 +213,13 @@ apply (Func params' varargs body' closure') args =
         bindVarArgs arg env = case arg of
             Just argName -> liftIO $ bindVars env [(argName, List $ remainingArgs)]
             Nothing -> return env
+apply (IOFunc func) args = func args
 apply notFunc _ = throwError $ NotFunction "Invalid function application" (show notFunc)
+
+readOrThrow :: Parser a -> String -> ThrowsError a
+readOrThrow parser input = case parse parser "lisp" input of
+    Left err -> throwError $ Parser err
+    Right val -> return val
 
 makeFunc :: Show a => Maybe String -> Env -> [a] -> [LispVal] -> IOThrowsError LispVal
 makeFunc varargs env params' body' =
@@ -249,9 +260,31 @@ primitives = [
     ("eqv?", eqv),
     ("equal?", equal)]
 
+ioPrimitives :: [(String, [LispVal] -> IOThrowsError LispVal)]
+ioPrimitives = [
+    ("apply", applyProc),
+    ("open-input-file", makePort ReadMode),
+    ("open-output-file", makePort WriteMode),
+    ("close-input-port", closePort),
+    ("close-output-port", closePort),
+    ("read", readProc),
+    ("write", writeProc),
+    ("read-contents", readContents),
+    ("read-all", readAll)]
+
 primitiveBindings :: IO Env
-primitiveBindings = nullEnv >>= (flip bindVars $ map makePrimitiveFunc primitives)
-    where makePrimitiveFunc (var, func) = (var, PrimitiveFunc func)
+primitiveBindings = nullEnv >>=
+    (flip bindVars $ map (makeFunc PrimitiveFunc primitives)
+                   ++ map (makeFunc IOFunc ioPrimitives))
+    where makeFunc ctor (var, func) = (var, ctor func)
+
+applyProc :: [LispVal] -> IOThrowsError LispVal
+applyProc [func, List args] = apply func args
+applyProc (func : args) = apply func args
+applyProc _ = throwError $ Default "Invalid apply invokation"
+
+makePort :: IOMode -> [LispVal] -> IOThrowsError LispVal
+makePort mode [String filename] = liftM Port $ openFile filename mode
 
 numericBinop :: (Integer -> Integer -> Integer) -> [LispVal] -> ThrowsError LispVal
 numericBinop _ [] = throwError $ NumArgs 2 []
