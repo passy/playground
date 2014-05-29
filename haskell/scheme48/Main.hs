@@ -1,4 +1,4 @@
-{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE ExistentialQuantification, DeriveDataTypeable #-}
 
 import Prelude
 import Numeric
@@ -6,8 +6,10 @@ import Data.Array
 import System.IO
 import Data.IORef
 import Data.Maybe
+import Data.Typeable
 -- TODO: Use Control.Monad.Trans.Except instead
 import Control.Monad.Error
+import Control.Exception.Base (throw, Exception)
 import Text.ParserCombinators.Parsec hiding (spaces)
 import System.Environment
 
@@ -21,7 +23,7 @@ data LispVal = Atom String
              | Vector (Array Int LispVal)
              | PrimitiveFunc ([LispVal] -> ThrowsError LispVal)
              | Func { params :: [String],
-                      vararg :: (Maybe String),
+                      vararg :: Maybe String,
                       body :: [LispVal],
                       closure :: Env }
              | IOFunc ([LispVal] -> IOThrowsError LispVal)
@@ -34,6 +36,9 @@ data LispError = NumArgs Integer [LispVal]
                | NotFunction String String
                | UnboundVar String String
                | Default String
+    deriving (Typeable)
+
+instance Exception LispError
 
 data Unpacker = forall a. Eq a => AnyUnpacker (LispVal -> ThrowsError a)
 
@@ -373,9 +378,9 @@ unpackEquals a b (AnyUnpacker unpacker) = do
 trapError :: (MonadError e m, Show e) => m String -> m String
 trapError action = catchError action (return . show)
 
--- Uh, that's quite ugly. But gotta stick to the tut.
 extractValue :: ThrowsError a -> a
 extractValue (Right val) = val
+extractValue (Left err) = throw err
 
 car :: [LispVal] -> ThrowsError LispVal
 car [List (x : _)] = return x
