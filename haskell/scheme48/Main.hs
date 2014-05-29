@@ -276,9 +276,9 @@ ioPrimitives = [
 
 primitiveBindings :: IO Env
 primitiveBindings = nullEnv >>=
-    (flip bindVars $ map (makeFunc PrimitiveFunc) primitives
-                   ++ map (makeFunc IOFunc) ioPrimitives)
-    where makeFunc ctor (var, func) = (var, ctor func)
+    (flip bindVars $ map (makeFunc' PrimitiveFunc) primitives
+                   ++ map (makeFunc' IOFunc) ioPrimitives)
+    where makeFunc' ctor (var, func) = (var, ctor func)
 
 applyProc :: [LispVal] -> IOThrowsError LispVal
 applyProc [func, List args] = apply func args
