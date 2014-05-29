@@ -88,10 +88,10 @@ liftThrows (Left err) = throwError err
 liftThrows (Right val) = return val
 
 runIOThrows :: IOThrowsError String -> IO String
-runIOThrows action = runErrorT (trapError action) >>= return . extractValue
+runIOThrows action = liftM extractValue $ runErrorT $ trapError action
 
 isBound :: Env -> String -> IO Bool
-isBound envRef var = readIORef envRef >>= return . isJust . lookup var
+isBound envRef var = liftM (isJust . lookup var) (readIORef envRef)
 
 getVar :: Env -> String -> IOThrowsError LispVal
 getVar envRef var = do
@@ -104,7 +104,7 @@ setVar :: Env -> String -> LispVal -> IOThrowsError LispVal
 setVar envRef var value = do
     env <- liftIO $ readIORef envRef
     maybe (throwError $ UnboundVar "Setting an unbound variable" var)
-          (liftIO . (flip writeIORef value))
+          (liftIO . flip writeIORef value)
           (lookup var env)
     return value
 
@@ -296,18 +296,18 @@ makePort _ [val] = throwError $ TypeMismatch "string" val
 makePort _ _ = throwError $ Default "Invalid makePort invocation"
 
 closePort :: [LispVal] -> IOThrowsError LispVal
-closePort [Port port] = liftIO $ hClose port >> (return $ Bool True)
+closePort [Port port] = liftIO (hClose port) >> return (Bool True)
 closePort _ = return $ Bool False
 
 readProc :: [LispVal] -> IOThrowsError LispVal
 readProc [] = readProc [Port stdin]
-readProc [Port port] = (liftIO $ hGetLine port) >>= liftThrows . readExpr
+readProc [Port port] = liftIO (hGetLine port) >>= liftThrows . readExpr
 readProc [val] = throwError $ TypeMismatch "port" val
 readProc _ = throwError $ Default "Invalid readProc invocation"
 
 writeProc :: [LispVal] -> IOThrowsError LispVal
 writeProc [obj] = writeProc [obj, Port stdout]
-writeProc [obj, Port port] = liftIO $ hPrint port obj >> (return $ Bool True)
+writeProc [obj, Port port] = liftIO $ hPrint port obj >> return (Bool True)
 writeProc _ = throwError $ Default "Invalid writeProc invocation"
 
 readContents :: [LispVal] -> IOThrowsError LispVal
@@ -415,7 +415,7 @@ eqv [(List arg1), (List arg2)] =
         eqvPair (x1, x2) =
             case eqv [x1, x2] of
                 Right (Bool val) -> val
-                Right (_) -> undefined
+                Right _ -> undefined
                 Left _ -> False -- Cannot be reached.
 eqv [_, _] = return $ Bool False
 eqv badArgList = throwError $ NumArgs 2 badArgList
@@ -477,7 +477,7 @@ parseCharacter = do
     return $ Character $ case value of
         "space" -> ' '
         "newline" -> '\n'
-        _ -> (value !! 0)
+        _ -> head value
 
 parseBool :: Parser LispVal
 parseBool = do
@@ -531,7 +531,7 @@ readPrompt :: String -> IO String
 readPrompt prompt = flushStr prompt >> getLine
 
 evalString :: Env -> String -> IO String
-evalString env expr = runIOThrows $ liftM show $ (liftThrows $ readExpr expr) >>= eval env
+evalString env expr = runIOThrows $ liftM show $ liftThrows (readExpr expr) >>= eval env
 
 evalAndPrint :: Env -> String -> IO ()
 evalAndPrint env expr = evalString env expr >>= putStrLn
@@ -539,9 +539,7 @@ evalAndPrint env expr = evalString env expr >>= putStrLn
 until_ :: Monad m => (a -> Bool) -> m a -> (a -> m ()) -> m ()
 until_ pred' prompt action = do
     result <- prompt
-    if pred' result
-        then return ()
-        else action result >> until_ pred' prompt action
+    unless (pred' result) $ action result >> until_ pred' prompt action
 
 runRepl :: IO ()
 runRepl = primitiveBindings >>=
@@ -551,7 +549,7 @@ runOne :: [String] -> IO ()
 runOne args = do
     env <- primitiveBindings >>= flip bindVars [
         ("args", List $ map String $ drop 1 args)]
-    (runIOThrows $ liftM show $ eval env (List [Atom "load", String (args !! 0)]))
+    runIOThrows (liftM show $ eval env (List [Atom "load", String (head args)]))
         >>= hPutStrLn stderr
 
 main :: IO ()
@@ -559,4 +557,4 @@ main = do
     args <- getArgs
     if null args
         then runRepl
-        else runOne $ args
+        else runOne args
