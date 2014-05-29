@@ -283,10 +283,12 @@ primitiveBindings = nullEnv >>=
 applyProc :: [LispVal] -> IOThrowsError LispVal
 applyProc [func, List args] = apply func args
 applyProc (func : args) = apply func args
-applyProc _ = throwError $ Default "Invalid apply invokation"
+applyProc _ = throwError $ Default "Invalid apply invocation"
 
 makePort :: IOMode -> [LispVal] -> IOThrowsError LispVal
 makePort mode [String filename] = liftM Port $ liftIO $ openFile filename mode
+makePort _ [val] = throwError $ TypeMismatch "string" val
+makePort _ _ = throwError $ Default "Invalid makePort invocation"
 
 closePort :: [LispVal] -> IOThrowsError LispVal
 closePort [Port port] = liftIO $ hClose port >> (return $ Bool True)
@@ -295,10 +297,13 @@ closePort _ = return $ Bool False
 readProc :: [LispVal] -> IOThrowsError LispVal
 readProc [] = readProc [Port stdin]
 readProc [Port port] = (liftIO $ hGetLine port) >>= liftThrows . readExpr
+readProc [val] = throwError $ TypeMismatch "port" val
+readProc _ = throwError $ Default "Invalid readProc invocation"
 
 writeProc :: [LispVal] -> IOThrowsError LispVal
 writeProc [obj] = writeProc [obj, Port stdout]
 writeProc [obj, Port port] = liftIO $ hPrint port obj >> (return $ Bool True)
+writeProc _ = throwError $ Default "Invalid writeProc invocation"
 
 readContents :: [LispVal] -> IOThrowsError LispVal
 readContents [String filename] = liftM String $ liftIO $ readFile filename
@@ -310,6 +315,8 @@ load filename = (liftIO $ readFile filename) >>= liftThrows . readExprList
 
 readAll :: [LispVal] -> IOThrowsError LispVal
 readAll [String filename] = liftM List $ load filename
+readAll [val] = throwError $ TypeMismatch "string" val
+readAll _ = throwError $ Default "Invalid readAll invocation"
 
 numericBinop :: (Integer -> Integer -> Integer) -> [LispVal] -> ThrowsError LispVal
 numericBinop _ [] = throwError $ NumArgs 2 []
