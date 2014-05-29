@@ -88,10 +88,10 @@ liftThrows (Left err) = throwError err
 liftThrows (Right val) = return val
 
 runIOThrows :: IOThrowsError String -> IO String
-runIOThrows action = liftM extractValue $ runErrorT $ trapError action
+runIOThrows = fmap extractValue . runErrorT . trapError
 
 isBound :: Env -> String -> IO Bool
-isBound envRef var = liftM (isJust . lookup var) (readIORef envRef)
+isBound = flip (fmap . (isJust . ) . lookup) . readIORef
 
 getVar :: Env -> String -> IOThrowsError LispVal
 getVar envRef var = do
@@ -208,9 +208,9 @@ apply :: LispVal -> [LispVal] -> IOThrowsError LispVal
 apply (PrimitiveFunc func) args =
     liftThrows $ func args
 apply (Func params' varargs body' closure') args =
-    if num params' /= num args && varargs == Nothing
+    if num params' /= num args && isNothing varargs
         then throwError $ NumArgs (num params') args
-        else (liftIO $ bindVars closure' $ zip params' args) >>=
+        else liftIO (bindVars closure' $ zip params' args) >>=
             bindVarArgs varargs >>=
             evalbody'
     where
