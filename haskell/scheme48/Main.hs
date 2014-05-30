@@ -136,7 +136,7 @@ oct2dig x = fst $ head (readOct x)
 hex2dig :: (Num a, Eq a) => String -> a
 hex2dig x = fst $ head (readHex x)
 
-bin2dig :: [Char] -> Integer
+bin2dig :: String -> Integer
 bin2dig = bin2dig' 0
     where
         bin2dig' digint "" = digint
