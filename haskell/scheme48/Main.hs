@@ -131,10 +131,10 @@ bindVars envRef bindings = readIORef envRef >>= extendEnv bindings >>= newIORef
             return (var, ref)
 
 oct2dig :: (Num a, Eq a) => String -> a
-oct2dig x = fst $ readOct x !! 0
+oct2dig x = fst $ head (readOct x)
 
 hex2dig :: (Num a, Eq a) => String -> a
-hex2dig x = fst $ readHex x !! 0
+hex2dig x = fst $ head (readHex x)
 
 bin2dig :: [Char] -> Integer
 bin2dig = bin2dig' 0
