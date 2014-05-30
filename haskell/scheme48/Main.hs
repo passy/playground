@@ -218,7 +218,7 @@ apply (Func params' varargs body' closure') args =
         num = toInteger . length
         evalbody' env = liftM last $ mapM (eval env) body'
         bindVarArgs arg env = case arg of
-            Just argName -> liftIO $ bindVars env [(argName, List $ remainingArgs)]
+            Just argName -> liftIO $ bindVars env [(argName, List remainingArgs)]
             Nothing -> return env
 apply (IOFunc func) args = func args
 apply notFunc _ = throwError $ NotFunction "Invalid function application" (show notFunc)
@@ -482,7 +482,7 @@ parseCharacter = do
 parseBool :: Parser LispVal
 parseBool = do
     _ <- char '#'
-    ((char 't' >> return (Bool True)) <|> (char 'f' >> return (Bool True)))
+    (char 't' >> return (Bool True)) <|> (char 'f' >> return (Bool True))
 
 parseList :: Parser LispVal
 parseList = liftM List $ sepBy parseExpr spaces
@@ -505,7 +505,7 @@ parseVector = do
     _ <- string "#("
     arrayValues <- sepBy parseExpr spaces
     _ <- char ')'
-    return $ Vector (listArray (0, (length arrayValues - 1)) arrayValues)
+    return $ Vector (listArray (0, length arrayValues - 1) arrayValues)
 
 parseExpr :: Parser LispVal
 parseExpr = parseAtom
