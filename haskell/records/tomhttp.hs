@@ -1,26 +1,25 @@
-{-# Language NoImplicitPrelude, OverloadedStrings #-}
+{-# Language NoImplicitPrelude, OverloadedStrings, TemplateHaskell #-}
 
 import Prelude
+import Control.Lens
 
 data RequestMethod = GET | POST
     deriving (Show, Eq)
 
 data Request = Request {
-    host :: String,
-    headers :: [(String, String)],
-    method :: RequestMethod
+    _host :: String,
+    _headers :: [(String, String)],
+    _method :: RequestMethod
 } deriving (Show, Eq)
+
+makeLenses ''Request
 
 mkRequest :: RequestMethod -> String -> Request
 mkRequest method' host' = Request host' [] method'
 
 addHeader :: Request -> String -> String -> Request
 addHeader req key value =
-    Request {
-        host = host req,
-        headers = headers req ++ [(key, value)],
-        method = method req
-    }
+    set headers ((req ^. headers) ++ [(key, value)]) req
 
 main :: IO ()
 main = do
