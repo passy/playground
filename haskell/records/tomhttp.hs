@@ -18,8 +18,7 @@ mkRequest :: RequestMethod -> String -> Request
 mkRequest method' host' = Request host' [] method'
 
 addHeader :: Request -> String -> String -> Request
-addHeader req key value =
-    set headers ((req ^. headers) ++ [(key, value)]) req
+addHeader req key value = req & headers <>~ [(key, value)]
 
 main :: IO ()
 main = do
