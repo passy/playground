@@ -55,13 +55,25 @@ node a = do
 -- | Connect two nodes
 link :: UF r a => Node r -> Node r -> r ()
 link n1 n2 = do
+    -- Find the two nodes
     Node p1 <- find n1
     Node p2 <- find n2
 
     unless (p1 == p2) (adopt p1 p2)
 
     where
-        adopt = undefined
+        adopt x y = do
+            -- Deref to access the rank of the nodes
+            nx <- deref x
+            ny <- deref y
+
+            case compare (rank  nx) (rank ny) of
+                -- If equal, increment the rank of the first node
+                -- and change the parent of the second to the first
+                EQ -> do set x (nx { rank = rank nx + 1 })
+                         set y (ny { parent = Just x })
+                LT -> undefined
+                GT -> undefined
 
 -- | Given two nodes, determine whether they are connected or not
 connected :: UF r a => Node r -> Node r -> r Bool
