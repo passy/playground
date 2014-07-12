@@ -54,7 +54,14 @@ node a = do
 
 -- | Connect two nodes
 link :: UF r a => Node r -> Node r -> r ()
-link = undefined
+link n1 n2 = do
+    Node p1 <- find n1
+    Node p2 <- find n2
+
+    unless (p1 == p2) (adopt p1 p2)
+
+    where
+        adopt = undefined
 
 -- | Given two nodes, determine whether they are connected or not
 connected :: UF r a => Node r -> Node r -> r Bool
@@ -78,6 +85,12 @@ find (Node r) = do
     return (Node p)
 
     where
-        findRec = undefined
+        -- | Recursively jump up `parent` links until we're
+        --   at the root node
+        findRec (Node r) = do
+            n <- deref r
+            case parent n of
+                Nothing -> return (Node r)
+                Just p -> find (Node p)
 
 main = putStrLn "Hello, World"
