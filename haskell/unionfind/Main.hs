@@ -105,4 +105,6 @@ find (Node r) = do
                 Nothing -> return (Node r)
                 Just p -> find (Node p)
 
+-- There we go. Algo is complete, but we don't actually have an implementation
+-- of the Mem monad yet.
 main = putStrLn "Hello, World"
