@@ -62,7 +62,7 @@ connected n1 n2 = do
 
 -- | `find` takes any Node and returns another Node which is the
 --   “representative” node for some connected component in the graph.
-find :: UF r a -> Node r -> r (Node r)
-find = undefined
+find :: UF r a => Node r -> r (Node r)
+find (Node r) = undefined
 
 main = putStrLn "Hello, World"
