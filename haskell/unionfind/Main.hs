@@ -28,7 +28,15 @@ alter f r = do
 
 -- | This constraint indicated that we can Union/Find values
 --   `a` in the monad `r`
-type UF r a = ...
+type UF r a = (Mem r, Val r ~ Node_ r a)
+
+-- | A Union/Find Node `UF r a` actually stores references to a Node_ struct
+--   which builds a tree of values
+data Node_ r a = Node_ {
+    parent :: Maybe (Ref r),
+    rank :: Int,
+    value :: a
+}
 
 -- | Mutable reference to a node in a Union/Find graph
 newtype Node r = Node (Ref r)
@@ -43,7 +51,7 @@ link = undefined
 
 -- | Given two nodes, determine whether they are connected or not
 connected :: UF r a => Node r -> Node r -> r Bool
-connected = n1 n2 = do
+connected n1 n2 = do
     Node p1 <- find n1
     Node p2 <- find n2
     -- Union/Find works by maintaining the invariant that two Nodes are in the
