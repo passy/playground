@@ -72,8 +72,8 @@ link n1 n2 = do
                 -- and change the parent of the second to the first
                 EQ -> do set x (nx { rank = rank nx + 1 })
                          set y (ny { parent = Just x })
-                LT -> undefined
-                GT -> undefined
+                LT -> do set x (nx { parent = Just y })
+                GT -> do set y (ny { parent = Just x })
 
 -- | Given two nodes, determine whether they are connected or not
 connected :: UF r a => Node r -> Node r -> r Bool
