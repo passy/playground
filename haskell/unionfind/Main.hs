@@ -1,6 +1,11 @@
-{-# LANGUAGE TypeFamilies, FlexibleContexts, ConstraintKinds #-}
+{-# LANGUAGE TypeFamilies, FlexibleContexts, ConstraintKinds, NoImplicitPrelude #-}
 -- See
 -- https://tel.github.io/2014/07/12/mutable_algorithms_in_immutable_languges_part_1/
+module Main
+where
+
+import Prelude
+import Control.Monad (unless)
 
 -- | A monad providing an abstract interface over mutable memory,
 --   think of Ref(erences) in terms of pointers. Vals are the values
@@ -63,6 +68,16 @@ connected n1 n2 = do
 -- | `find` takes any Node and returns another Node which is the
 --   “representative” node for some connected component in the graph.
 find :: UF r a => Node r -> r (Node r)
-find (Node r) = undefined
+find (Node r) = do
+    Node p <- findRec (Node r)
+
+    -- *Path Compression*
+    -- Don't rewrite the top root since it doesn't have parent
+    unless (r == p) $ alter (\n -> n { parent = Just p }) r
+
+    return (Node p)
+
+    where
+        findRec = undefined
 
 main = putStrLn "Hello, World"
