@@ -43,7 +43,9 @@ newtype Node r = Node (Ref r)
 
 -- | Create a new node
 node :: UF r a => a -> r (Node r)
-node = undefined
+node a = do
+    r <- ref (Node_ { parent = Nothing, rank = 0, value = a })
+    return (Node r)
 
 -- | Connect two nodes
 link :: UF r a => Node r -> Node r -> r ()
