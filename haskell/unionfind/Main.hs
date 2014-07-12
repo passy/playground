@@ -1,4 +1,6 @@
 {-# LANGUAGE TypeFamilies, FlexibleContexts, ConstraintKinds #-}
+-- See
+-- https://tel.github.io/2014/07/12/mutable_algorithms_in_immutable_languges_part_1/
 
 -- | A monad providing an abstract interface over mutable memory,
 --   think of Ref(erences) in terms of pointers. Vals are the values
@@ -41,6 +43,16 @@ link = undefined
 
 -- | Given two nodes, determine whether they are connected or not
 connected :: UF r a => Node r -> Node r -> r Bool
-connected = undefined
+connected = n1 n2 = do
+    Node p1 <- find n1
+    Node p2 <- find n2
+    -- Union/Find works by maintaining the invariant that two Nodes are in the
+    -- same connected component iff their representative nodes are the same.
+    return (p1 == p2)
+
+-- | `find` takes any Node and returns another Node which is the
+--   “representative” node for some connected component in the graph.
+find :: UF r a -> Node r -> r (Node r)
+find = undefined
 
 main = putStrLn "Hello, World"
