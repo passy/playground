@@ -23,7 +23,6 @@ class (Monad r, Eq (Ref r)) => Mem r where
     -- | Set the value of a reference to a new value (side-effecting)
     set :: Ref r -> Val r -> r ()
 
-
 -- | Alter the value of a `Mem` reference. Notice that this works for *any*
 --   `Mem` monad.
 alter :: Mem r => (Val r -> Val r) -> Ref r -> r ()
