@@ -7,6 +7,9 @@ instance Monad (Reader r) where
 asks :: (r -> a) -> Reader r a
 asks f = Reader f
 
+ask :: Reader a a
+ask = Reader id
+
 -- Example Code
 
 data MyContext = MyContext {
@@ -28,7 +31,16 @@ ex1 = runReader computation $ MyContext "hello" 1
 ex2 :: Maybe String
 ex2 = runReader computation $ MyContext "haskell" 0
 
+ex3 :: String
+ex3 = runReader computation2 "Haskell"
+    where
+        computation2 :: Reader String String
+        computation2 = do
+            name <- ask
+            return $ "Hello, " ++ name
+
 main :: IO ()
 main = do
     print ex1
     print ex2
+    print ex3
