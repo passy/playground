@@ -39,5 +39,11 @@ data DIContext = DIContext {
     prettyPrint :: String -> Int -> String
 }
 
+-- Silly example
+
+silly :: Reader [a] Int
+silly = asks length
+
 main :: IO ()
-main = pub
+main =
+    print $ runReader silly [1, 2, 3]
