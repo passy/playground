@@ -24,14 +24,27 @@ Reader.prototype.flatMap = function (k) {
     }.bind(this));
 };
 
-var computation0 = function (name) {
+var greet = function (name) {
     return Reader.ask().flatMap(function (ctx) {
         return this.unit(ctx + ", " + name);
     });
-}
-
-var example = function () {
-    console.log(computation0("Tom").run("Hi"));
 };
 
-example();
+var example0 = function () {
+    console.log(greet("Tom").run("Hi"));
+};
+
+example0();
+
+var end = function (str) {
+    var isHello = _.partial(_.isEqual, "Hello");
+    return Reader.asks(isHello).flatMap(function (isH) {
+        return this.unit(str + (isH ? "!" : "."));
+    });
+};
+
+var example1 = function () {
+    console.log(greet("James").flatMap(end).run("Hello"));
+};
+
+example1();
