@@ -1,0 +1,27 @@
+{
+  "name": "reader-playground",
+  "version": "0.0.0",
+  "homepage": "https://github.com/passy/playground",
+  "authors": [
+    "Pascal Hartig <passy@twitter.com>"
+  ],
+  "description": "Reader Monad example in JavaScript",
+  "keywords": [
+    "reader",
+    "monad"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "lodash": "~2.4.1",
+    "monet": "~0.8.1"
+  },
+  "main": "main.js"
+}
