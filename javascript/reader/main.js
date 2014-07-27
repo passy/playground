@@ -1,3 +1,5 @@
+'use strict';
+
 var Reader = function (fn) {
     this.f = fn;
 };
