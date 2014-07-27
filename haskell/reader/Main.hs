@@ -1,7 +1,12 @@
+{-# Language DeriveFunctor, GeneralizedNewtypeDeriving #-}
+import Control.Applicative
+
+-- Holy fuck, how is this even possible to derive?
 newtype Reader r a = Reader { runReader :: r -> a }
+    deriving (Functor, Applicative)
 
 instance Monad (Reader r) where
-    return a = Reader $ \_ -> a
+    return = pure
     m >>= k = Reader $ \r -> runReader (k $ runReader m r) r
 
 asks :: (r -> a) -> Reader r a
