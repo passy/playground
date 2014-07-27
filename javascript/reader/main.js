@@ -2,34 +2,36 @@ var Reader = function (fn) {
     this.f = fn;
 };
 
+Reader.ask = function () {
+    return new Reader(_.identity);
+};
+
+Reader.asks = function (fn) {
+    return new Reader(fn);
+};
+
 Reader.prototype.run = function (ctx) {
     return this.f(ctx);
 };
 
-Reader.prototype.map = function (fn) {
-    return new Reader(function (ctx) {
-        return fn(this.run(ctx));
+Reader.prototype.unit = function (fn) {
+    return new Reader(_.constant(fn));
+};
+
+Reader.prototype.flatMap = function (k) {
+    return new Reader(function (r) {
+        return k.call(this, this.run(r)).run(r);
     }.bind(this));
 };
 
-Reader.prototype.flatMap = function (fn) {
-    return new Reader(function (ctx) {
-        return fn(this.run(ctx)).run(ctx);
-    }.bind(this));
-};
-
-var simple = new Reader(function () {
-    return this.ask();
-});
-
-var computation = new Reader(function (name) {
-    this.ask().bind(function (greeting) {
-        return this.unit(greeting + ", " + name);
+var computation0 = function (name) {
+    return Reader.ask().flatMap(function (ctx) {
+        return this.unit(ctx + ", " + name);
     });
-});
+}
 
 var example = function () {
-    console.log(computation("Tom").runReader("Hello"));
+    console.log(computation0("Tom").run("Hi"));
 };
 
 example();
