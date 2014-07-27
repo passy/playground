@@ -60,10 +60,8 @@ example3 context = runReader (greet "James" >>= end) context
 
         end :: String -> Reader String String
         end input = do
-            greeting <- ask
-            return $ input ++ case greeting of
-                "Hello" -> "!"
-                _ -> "."
+            isHello <- asks (== "Hello")
+            return $ input ++ if isHello then "!" else "."
 
 main :: IO ()
 main = putStrLn $ example3 "Hello"
