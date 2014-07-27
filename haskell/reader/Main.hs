@@ -34,6 +34,35 @@ pub =
         computation :: Maybe String
         computation = runReader bartender $ MyContext "@phuunet" 16
 
+--
+
+example2 :: String -> String
+example2 context = runReader (computation "Tom") context
+    where
+        computation :: String -> Reader String String
+        computation name = do
+            greeting <- ask
+            return $ greeting ++ ", " ++ name
+
+
+example3 :: String -> String
+example3 context = runReader (greet "James" >>= end) context
+    where
+        greet :: String -> Reader String String
+        greet name = do
+            greeting <- ask
+            return $ greeting ++ ", " ++ name
+
+        end :: String -> Reader String String
+        end input = do
+            greeting <- ask
+            return $ input ++ case greeting of
+                "Hello" -> "!"
+                _ -> "."
+
+main :: IO ()
+main = putStrLn $ example3 "Hello"
+
 -- DI Example
 data DIContext = DIContext {
     prettyPrint :: String -> Int -> String
@@ -44,6 +73,6 @@ data DIContext = DIContext {
 silly :: Reader [a] Int
 silly = asks length
 
-main :: IO ()
-main =
+mainSilly :: IO ()
+mainSilly =
     print $ runReader silly [1, 2, 3]
