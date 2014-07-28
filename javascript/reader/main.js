@@ -16,10 +16,15 @@ Reader.prototype.run = function (ctx) {
     return this.f(ctx);
 };
 
+// We use the name “unit” here since “return”
+// is a keyword in JavaScript.
 Reader.prototype.unit = function (fn) {
     return new Reader(_.constant(fn));
 };
 
+// `bind` isn’t a keyword but also has a different
+// meaning in JS, so we use `flatMap` instead. Scala
+// peeps, rejoice!
 Reader.prototype.flatMap = function (k) {
     return new Reader(function (r) {
         return k.call(this, this.run(r)).run(r);
