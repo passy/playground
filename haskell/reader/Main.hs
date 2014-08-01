@@ -63,6 +63,12 @@ example3 context = runReader (greet "James" >>= end) context
             isHello <- asks (== "Hello")
             return $ input ++ if isHello then "!" else "."
 
+        end' :: String -> Reader String String
+        end' input =
+            asks (== "Hello") >>= (\isHello ->
+                return $ input ++ if isHello then "!" else "."
+            )
+
 main :: IO ()
 main = putStrLn $ example3 "Hello"
 
