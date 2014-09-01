@@ -1,0 +1,105 @@
+[1 of 1] Compiling Main             ( boom.hs, boom.o )
+
+==================== Tidy Core ====================
+Result size of Tidy Core = {terms: 46, types: 47, coercions: 14}
+
+main3 :: [Char]
+[GblId,
+
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=0, Value=False,
+         ConLike=False, WorkFree=False, Expandable=False,
+         Guidance=IF_ARGS [] 90 0}]
+main3 = unpackCString# "Never start with an a!"#
+
+main2 :: Exception.AssertionFailed
+[GblId,
+
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=0, Value=True,
+         ConLike=True, WorkFree=True, Expandable=True,
+         Guidance=IF_ARGS [] 10 20}]
+main2 = Exception.AssertionFailed main3
+
+main5 :: Char
+[GblId,
+
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=0, Value=True,
+         ConLike=True, WorkFree=True, Expandable=True,
+         Guidance=IF_ARGS [] 10 20}]
+main5 = C# 'a'
+
+main4 :: [Char]
+[GblId,
+
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=0, Value=True,
+         ConLike=True, WorkFree=True, Expandable=True,
+         Guidance=IF_ARGS [] 10 30}]
+main4 =
+  :
+    @ Char main5 ([] @ Char)
+
+main1
+  :: State# RealWorld
+     -> (# State# RealWorld, () #)
+[GblId,
+ Arity=1,
+
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=1, Value=True,
+         ConLike=True, WorkFree=True, Expandable=True,
+         Guidance=IF_ARGS [0] 160 30}]
+main1 =
+  \ (eta_B1 :: State# RealWorld) ->
+    case Handle.Internals.wantReadableHandle_1
+           @ String
+           Handle.Text.hGetLine3
+           Handle.FD.stdin
+           (Handle.Text.hGetLine2 `cast` ...)
+           eta_B1
+    of _ [Occ=Dead] { (# ipv_a1EB, ipv1_a1EC #) ->
+    case $fEq[]_$s$c==
+           (take_unsafe_UInt @ Char 1 ipv1_a1EC) main4
+    of _ [Occ=Dead] {
+      False -> (# ipv_a1EB, () #);
+      True ->
+        case throw2
+               @ Exception.AssertionFailed
+               @ (IO ())
+               main2
+               Exception.$fExceptionAssertionFailed_$ctoException
+        of wild1_00 {
+        }
+    }
+    }
+
+main :: IO ()
+[GblId,
+ Arity=1,
+
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=0, Value=True,
+         ConLike=True, WorkFree=True, Expandable=True,
+         Guidance=ALWAYS_IF(unsat_ok=True,boring_ok=True)}]
+main = main1 `cast` ...
+
+main6
+  :: State# RealWorld
+     -> (# State# RealWorld, () #)
+[GblId,
+ Arity=1,
+
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=1, Value=True,
+         ConLike=True, WorkFree=True, Expandable=True,
+         Guidance=ALWAYS_IF(unsat_ok=True,boring_ok=True)}]
+main6 =
+  \ (eta_X9 :: State# RealWorld) ->
+    runMainIO1 @ () (main1 `cast` ...) eta_X9
+
+:main :: IO ()
+[GblId,
+ Arity=1,
+
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=0, Value=True,
+         ConLike=True, WorkFree=True, Expandable=True,
+         Guidance=ALWAYS_IF(unsat_ok=True,boring_ok=True)}]
+:main = main6 `cast` ...
+
+Linking boom ...
+
