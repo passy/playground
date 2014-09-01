@@ -1,0 +1,10 @@
+%module main:Main
+  main:Main.main :: ghczmprim:GHCziTypes.IO
+                    ghczmprim:GHCziTuple.Z0T =
+    base:GHCziBase.return @ ghczmprim:GHCziTypes.IO
+    base:GHCziBase.zdfMonadIO @ ghczmprim:GHCziTuple.Z0T
+    ghczmprim:GHCziTuple.Z0T;
+  main:ZCMain.main :: ghczmprim:GHCziTypes.IO
+                      ghczmprim:GHCziTuple.Z0T =
+    base:GHCziTopHandler.runMainIO @ ghczmprim:GHCziTuple.Z0T
+    main:Main.main;
