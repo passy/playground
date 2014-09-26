@@ -27,3 +27,11 @@ main :: IO ()
 main = do
     u <- getUser 12345
     mapM_ printUserName u
+
+    -- Alternatively:
+    maybe (return ()) print u
+
+    -- Or very explicitly:
+    case u of
+        Just user -> printUserName user
+        Nothing   -> return ()
