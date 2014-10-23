@@ -1,0 +1,51 @@
+[1 of 1] Compiling Main             ( helloworld.hs, helloworld.o )
+
+==================== Tidy Core ====================
+Result size of Tidy Core = {terms: 14, types: 24, coercions: 9}
+
+main1
+  :: State# RealWorld
+     -> (# State# RealWorld, () #)
+[GblId,
+ Arity=1,
+
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=1, Value=True,
+         ConLike=True, WorkFree=True, Expandable=True,
+         Guidance=ALWAYS_IF(unsat_ok=True,boring_ok=True)}]
+main1 =
+  \ (eta_B1 :: State# RealWorld) ->
+    (# eta_B1, () #)
+
+main :: IO ()
+[GblId,
+ Arity=1,
+
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=0, Value=True,
+         ConLike=True, WorkFree=True, Expandable=True,
+         Guidance=ALWAYS_IF(unsat_ok=True,boring_ok=True)}]
+main = main1 `cast` ...
+
+main2
+  :: State# RealWorld
+     -> (# State# RealWorld, () #)
+[GblId,
+ Arity=1,
+
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=1, Value=True,
+         ConLike=True, WorkFree=True, Expandable=True,
+         Guidance=ALWAYS_IF(unsat_ok=True,boring_ok=True)}]
+main2 =
+  \ (eta_X7 :: State# RealWorld) ->
+    runMainIO1 @ () (main1 `cast` ...) eta_X7
+
+:main :: IO ()
+[GblId,
+ Arity=1,
+
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=0, Value=True,
+         ConLike=True, WorkFree=True, Expandable=True,
+         Guidance=ALWAYS_IF(unsat_ok=True,boring_ok=True)}]
+:main = main2 `cast` ...
+
+Linking helloworld ...
+

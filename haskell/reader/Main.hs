@@ -63,14 +63,32 @@ example3 context = runReader (greet "James" >>= end) context
             isHello <- asks (== "Hello")
             return $ input ++ if isHello then "!" else "."
 
+example4 :: String -> String
+example4 context = runReader (greet "James" >>= end) context
+    where
+        greet :: String -> Reader String String
+        greet name = do
+            greeting <- ask
+            return $ greeting ++ ", " ++ name
+
+        end :: String -> Reader String String
+        end input = do
+            isHello <- asks (== "Hello")
+            hasE <- asks((== "e") . (drop 1) . (take 2))
+            let count = if hasE then 3 else 1
+            return $ input ++ (concat $ replicate count $ if isHello then "!" else ".")
+
         end' :: String -> Reader String String
         end' input =
             asks (== "Hello") >>= (\isHello ->
-                return $ input ++ if isHello then "!" else "."
+                asks((== "e") . (drop 1) . (take 2)) >>= (\hasE ->
+                    let count = if hasE then 3 else 1 in
+                    return $ input ++ (concat $ replicate count $ if isHello then "!" else ".")
+                )
             )
 
 main :: IO ()
-main = putStrLn $ example3 "Hello"
+main = putStrLn $ example4 "Hi"
 
 -- DI Example
 data DIContext = DIContext {
