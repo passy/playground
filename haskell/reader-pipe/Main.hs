@@ -1,11 +1,10 @@
 import Control.Monad.IO.Class (MonadIO)
-import Data.Conduit as C
-import Data.Conduit.List as CL
+import Control.Monad.Trans.Resource (runResourceT)
+import qualified Data.Conduit as C
+import qualified Data.Conduit.List as CL
+import qualified Data.Conduit.Binary as CB
 
-
-multiplyC :: (MonadIO m) => C.Conduit Int m Int
-multiplyC = CL.map (* 5)
 
 main :: IO ()
 main = do
-    CL.sourceList [1..20] C.$$ multiplyC C.=$ CL.mapM_ (putStrLn . show)
+    runResourceT $ CB.sourceFile "shakespeare.txt" C.$$ CB.sinkFile "lulz"
