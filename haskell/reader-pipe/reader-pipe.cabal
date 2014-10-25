@@ -24,5 +24,6 @@ executable reader-pipe
                     ,  conduit-extra
                     ,  resourcet
                     ,  transformers
+                    ,  text
   -- hs-source-dirs:      
   default-language:    Haskell2010
