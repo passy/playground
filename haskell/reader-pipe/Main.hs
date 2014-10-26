@@ -15,7 +15,7 @@ import qualified Data.Conduit.Binary as CB
 
 
 countWords :: MonadIO m => C.Conduit T.Text m (T.Text, Int)
-countWords = C.await >>= mapM_ (\w -> (C.yield (w, 1)))
+countWords = C.await >>= mapM_ (\w -> C.yield (w, 1)) >> countWords
 
 
 main :: IO ()
@@ -26,7 +26,6 @@ main = do
         CL.filter (not . T.null) C.$=
         CL.mapFoldable T.words C.$=
         countWords C.$=
-        CL.consume
-        -- CL.take 5
+        CL.take 5
 
     print result
