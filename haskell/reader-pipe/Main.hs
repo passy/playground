@@ -17,6 +17,6 @@ main = do
         CL.map (T.strip . TE.decodeUtf8) C.$=
         CL.filter (not . T.null) C.$=
         CL.mapFoldable T.words C.$=
-        CL.consume
+        CL.take 5
 
-    print $ take 5 result
+    print $ result
