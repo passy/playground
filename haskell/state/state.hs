@@ -5,8 +5,12 @@ import Control.Applicative
 newtype State s a = State { runState :: s -> (a, s) }
     deriving (Functor)
 
+instance Applicative (State s) where
+    pure a = State $ \s -> (a, s)
+    (State s1) <*> (State s2) = State $ \s -> s1
+
 instance Monad (State s) where
-    return a = State $ \s -> (a, s)
+    return = pure
     m >>= k = State $ \s -> let
         (a', s') = runState m s
         in runState (k a') s'
