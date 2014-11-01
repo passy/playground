@@ -1,3 +1,6 @@
 .cabal-sandbox/
 dist/
-*.sandbox.config
+*.hi
+*.js_*
+*.o
+*.jsexe/
