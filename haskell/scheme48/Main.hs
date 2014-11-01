@@ -316,7 +316,7 @@ readContents [val@_] = throwError $ TypeMismatch "string" val
 readContents val@_ = throwError $ NumArgs 1 val
 
 load :: String -> IOThrowsError [LispVal]
-load filename = (liftIO $ readFile filename) >>= liftThrows . readExprList
+load filename = liftIO (readFile filename) >>= liftThrows . readExprList
 
 readAll :: [LispVal] -> IOThrowsError LispVal
 readAll [String filename] = liftM List $ load filename
@@ -326,18 +326,21 @@ readAll _ = throwError $ Default "Invalid readAll invocation"
 numericBinop :: (Integer -> Integer -> Integer) -> [LispVal] -> ThrowsError LispVal
 numericBinop _ [] = throwError $ NumArgs 2 []
 numericBinop _ singleVal@[_] = throwError $ NumArgs 2 singleVal
-numericBinop op params' = mapM unpackNum params' >>= return . Number . foldl1 op
+numericBinop op params' = liftM (Number . foldl1 op) (mapM unpackNum params')
+
 
 boolBinop :: (LispVal -> ThrowsError a) -> (a -> a -> Bool) -> [LispVal] -> ThrowsError LispVal
-boolBinop unpacker op args=
+boolBinop unpacker op args =
     if length args /= 2
     then throwError $ NumArgs 2 args
-    else do
+    else
         -- TODO: I'm sure there's a nicer, less imperative
         -- way for this.
-        left <- unpacker $ args !! 0
-        right <- unpacker $ args !! 1
-        return $ Bool $ left `op` right
+        let (argl : argr : _) = args
+        in do
+            left <- unpacker argl
+            right <- unpacker argr
+            return $ Bool $ left `op` right
 
 numBoolBinop :: (Integer -> Integer -> Bool) -> [LispVal] -> ThrowsError LispVal
 numBoolBinop = boolBinop unpackNum
