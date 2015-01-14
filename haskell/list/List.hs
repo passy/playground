@@ -9,3 +9,4 @@ main :: IO ()
 main = do
     let l = Cons 2 (Cons 3 (Cons 5 (Cons 8 End))) :: List Int
     print l
+    print $ fmap (*2) l
