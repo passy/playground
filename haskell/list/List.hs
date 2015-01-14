@@ -1,6 +1,9 @@
 data List a = End | Cons a (List a)
     deriving (Show)
 
+instance Functor List where
+    fmap _ End         = End
+    fmap f (Cons x xs) = Cons (f x) (fmap f xs)
 
 main :: IO ()
 main = do
