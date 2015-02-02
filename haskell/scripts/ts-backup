@@ -1,0 +1,51 @@
+#!/usr/bin/env runhaskell
+{-# LANGUAGE OverloadedStrings #-}
+
+import Data.Text as T
+import Prelude hiding (FilePath)
+import Turtle
+import Data.Time.Format (formatTime)
+import System.Locale (defaultTimeLocale)
+
+excludeList :: [Text]
+excludeList =
+    [ "node_modules"
+    , "bower_components"
+    , ".cabal-sandbox"
+    , "dist"
+    , "idea"
+    ]
+
+prependToAll :: a -> [a] -> [a]
+prependToAll _   []     = []
+prependToAll sep (x:xs) = sep : x : prependToAll sep xs
+
+printArchives :: IO ()
+printArchives = do
+    echo "Retrieving archive list ..."
+    sh $ do
+        archive <- inproc "tarsnap" ["--list-archives"] Turtle.empty
+        liftIO $ print archive
+
+createBackup :: Text -> FilePath -> IO ()
+createBackup name path = do
+    now <- date
+    let excludeArgs = prependToAll "--exclude" excludeList
+    let fullName = name <> T.pack (formatTime defaultTimeLocale "%Y%m%d" now)
+    let textPath = case (toText path) of Right f -> f
+                                         _       -> error "Invalid path"
+
+    let args = [ "-vvv"
+               , "--aggressive-networking"
+               ] <> excludeArgs <>
+               [ "-c"
+               , "-f"
+               , fullName
+               , textPath
+               ]
+    view $ inproc "tarsnap" args Turtle.empty
+
+main :: IO ()
+main = do
+    createBackup "projects" "/home/pascal/Projects"
+    return ()
