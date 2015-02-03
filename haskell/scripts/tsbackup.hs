@@ -27,7 +27,7 @@ printArchives = do
         archive <- inproc "tarsnap" ["--list-archives"] Turtle.empty
         liftIO $ print archive
 
-createBackup :: Text -> FilePath -> IO ()
+createBackup :: Text -> FilePath -> IO ExitCode
 createBackup name path = do
     now <- date
     let excludeArgs = prependToAll "--exclude" excludeList
@@ -43,9 +43,15 @@ createBackup name path = do
                , fullName
                , textPath
                ]
-    view $ inproc "tarsnap" args Turtle.empty
+    proc "tarsnap" args Turtle.empty
+
+fsck :: IO ExitCode
+fsck = shell "tarsnap --fsck" Turtle.empty
 
 main :: IO ()
 main = do
-    createBackup "projects" "/home/pascal/Projects"
-    return ()
+    ecode <- createBackup "projects" "/home/pascal/Projects"
+    case ecode of
+        ExitSuccess -> return ()
+        ExitFailure 1 -> fsck >> main
+        ExitFailure e -> die $ format ("Unhandled tarsnap error code: "%d) e
