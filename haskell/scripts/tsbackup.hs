@@ -32,8 +32,7 @@ createBackup name path = do
     now <- date
     let excludeArgs = prependToAll "--exclude" excludeList
     let fullName = name <> "-" <> T.pack (formatTime defaultTimeLocale "%Y%m%d" now)
-    let textPath = case (toText path) of Right f -> f
-                                         _       -> error "Invalid path"
+    let textPath = either (error "Invalid path") id (toText path)
 
     let args = [ "-vvv"
                , "--aggressive-networking"
