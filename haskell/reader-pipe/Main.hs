@@ -13,12 +13,13 @@ import qualified Data.Conduit.Binary as CB
 import qualified Data.Conduit.Text as CT
 
 
+-- TODO: Let this take some scoring read from a Reader into account
 mapWords :: MonadIO m => C.Conduit T.Text m (T.Text, Int)
 mapWords = C.await >>= mapM_ (\w -> C.yield (w, 1)) >> mapWords
 
 
-reduceWords :: MonadIO m => C.Conduit (T.Text, Int) m [(T.Text, Int)]
-reduceWords = undefined
+reduceScore :: MonadIO m => C.Sink (T.Text, Int) m Int
+reduceScore = CL.fold (\a b -> a + snd b) 0
 
 main :: IO ()
 main = do
@@ -29,7 +30,6 @@ main = do
         CL.filter (not . T.null) C.$=
         CL.mapFoldable T.words C.$=
         mapWords C.$=
-        -- reduceWords C.$=
-        CL.take 5
+        reduceScore
 
     print res
