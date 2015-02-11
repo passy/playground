@@ -2,6 +2,7 @@
 
 import Prelude hiding (mapM_)
 
+import Data.Foldable (forM_)
 import Data.Maybe (fromMaybe)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Trans.Resource (runResourceT)
@@ -17,16 +18,12 @@ type ScoreMap = [(T.Text, Int)]
 
 -- TODO: Let this take some scoring read from a Reader into account
 mapWordsScore :: MonadIO m => ScoreMap -> C.Conduit T.Text m (T.Text, Int)
--- TODO: Make it work, make it pretty, make it ... don't care, but no nested
--- pattern matches ffs.
 mapWordsScore scores = do
     res <- C.await
-    case res of
-         (Just word) -> do
-             let s = lookup word scores
-             C.yield (word, fromMaybe 0 s)
-             mapWordsScore scores
-         _ -> return ()
+    forM_ res $ \word -> do
+        let s = lookup word scores
+        C.yield (word, fromMaybe 0 s)
+        mapWordsScore scores
 
 reduceScore :: MonadIO m => C.Sink (T.Text, Int) m Int
 reduceScore = CL.fold (\a b -> a + snd b) 0
