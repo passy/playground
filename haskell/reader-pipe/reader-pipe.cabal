@@ -22,6 +22,7 @@ executable reader-pipe
   build-depends:       base >=4.7 && <4.8
                     ,  conduit >= 1.2.1
                     ,  conduit-extra
+                    ,  conduit-combinators
                     ,  resourcet
                     ,  transformers
                     ,  text
