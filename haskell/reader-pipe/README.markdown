@@ -24,3 +24,10 @@ Once the above works:
 
 - Wrap in ReaderT, configured with scoring
 - Scoring transformer reads from ReaderT as opposed to StateT
+
+Intermediate plan:
+
+- Read file
+- Split words
+- Assign score based on static list
+- Move that scoring from a parameter to a Reader <- That's where I'm at.
