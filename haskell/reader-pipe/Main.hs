@@ -9,8 +9,6 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Trans.Resource (runResourceT)
 import Control.Monad.Trans.Reader (ReaderT, runReaderT, ask)
 
-import Data.Conduit.Lift (runReaderC)
-
 import qualified Data.Text as T
 import qualified Data.Conduit as C
 import qualified Data.Conduit.List as CL
@@ -42,10 +40,8 @@ scoring = [ "winters" -: 10
           ]
 
 main :: IO ()
-main = do
-    -- XXX: I think runReaderT must be flipped.
-    res <- runResourceT $ runReaderT (
-        CB.sourceFile "shakespeare.txt" C.$$
+main = let
+    chain = CB.sourceFile "shakespeare.txt" C.$$
         CB.lines C.$=
         CT.decode CT.utf8 C.$=
         CL.filter (not . T.null) C.$=
@@ -54,6 +50,5 @@ main = do
         CL.mapFoldable T.words C.$=
         mapWordsScore C.$=
         reduceScore
-        ) scoring
-
-    print res
+    in
+        runResourceT (runReaderT chain scoring) >>= print
