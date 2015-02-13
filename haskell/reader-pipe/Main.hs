@@ -44,7 +44,7 @@ scoring = [ "winters" -: 10
 main :: IO ()
 main = do
     -- XXX: I think runReaderT must be flipped.
-    res <- runResourceT $ runReaderT scoring $
+    res <- runResourceT $ runReaderT (
         CB.sourceFile "shakespeare.txt" C.$$
         CB.lines C.$=
         CT.decode CT.utf8 C.$=
@@ -54,5 +54,6 @@ main = do
         CL.mapFoldable T.words C.$=
         mapWordsScore C.$=
         reduceScore
+        ) scoring
 
     print res
