@@ -2,7 +2,6 @@
 
 import Prelude hiding (mapM_)
 
-import Data.Foldable (forM_)
 import Data.Maybe (fromMaybe)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.IO.Class (MonadIO)
@@ -21,8 +20,7 @@ type ScoreMap = [(T.Text, Int)]
 mapWordsScore :: MonadIO m => C.Conduit T.Text (ReaderT ScoreMap m) (T.Text, Int)
 mapWordsScore = do
     scores <- lift ask
-    res <- C.await
-    forM_ res $ \word -> do
+    C.awaitForever $ \word -> do
         let s = lookup word scores
         C.yield (word, fromMaybe 0 s)
         mapWordsScore
