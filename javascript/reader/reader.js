@@ -1,5 +1,7 @@
 'use strict';
 
+var _ = require('lodash');
+
 var Reader = function (fn) {
     this.f = fn;
 };
@@ -41,8 +43,6 @@ var example0 = function () {
     console.log(greet("Tom").run("Hi"));
 };
 
-example0();
-
 var end = function (str) {
     var isHello = _.partial(_.isEqual, "Hello");
     return Reader.asks(isHello).flatMap(function (isH) {
@@ -54,4 +54,7 @@ var example1 = function () {
     console.log(greet("James").flatMap(end).run("Hello"));
 };
 
-example1();
+module.exports = {
+    example0: example0,
+    example1: example1
+}
