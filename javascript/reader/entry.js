@@ -2,6 +2,8 @@
 
 var reader = require('./reader');
 
-console.log('Hello.');
 reader.example0();
 reader.example1();
+
+var square = λ(_1 * _1);
+console.log(square(4));
