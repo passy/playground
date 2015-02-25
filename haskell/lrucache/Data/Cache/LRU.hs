@@ -1,4 +1,4 @@
-module Data.Cache.LRU where
+module Data.Cache.LRU ( empty ) where
 
 import           Control.Applicative ((<$>))
 import           Data.Hashable       (Hashable, hash)
@@ -9,4 +9,14 @@ import           Data.Maybe          (isNothing)
 import qualified Data.Vector         as V
 import           Prelude             hiding (lookup)
 
-import Data.Cache.LRU.Types (Cache, Priority)
+import qualified Data.Cache.LRU.Types as T
+
+empty :: Int -> T.Cache k v
+empty capacity
+    | capacity < 1 = error "LRU.empty: capacity < 1"
+    | otherwise    = T.Cache
+        { T.capacity = capacity
+        , T.size     = 0
+        , T.tick     = 0
+        , T.queue    = HashPSQ.empty
+        }

@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 module Data.Cache.LRU.Types where
 
 import Data.Int (Int64)
