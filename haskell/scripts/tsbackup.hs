@@ -13,6 +13,7 @@ excludeList =
     [ "node_modules"
     , "bower_components"
     , ".cabal-sandbox"
+    , ".ve"
     , "dist"
     , "idea"
     ]
