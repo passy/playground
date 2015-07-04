@@ -14,6 +14,7 @@ excludeList =
     , "bower_components"
     , ".cabal-sandbox"
     , ".ve"
+    , ".stack-work"
     , "dist"
     , "idea"
     ]
