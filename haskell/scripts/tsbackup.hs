@@ -1,4 +1,5 @@
-#!/usr/bin/env runhaskell
+#!/usr/bin/env stack
+-- stack --resolver lts-2.9 --install-ghc runghc --package turtle
 {-# LANGUAGE OverloadedStrings #-}
 
 import Data.Text as T
