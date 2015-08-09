@@ -1,0 +1,17 @@
+name:                trees
+version:             0.1.0.0
+license:             MIT
+license-file:        LICENSE
+author:              Pascal Hartig
+maintainer:          phartig@twitter.com
+build-type:          Simple
+cabal-version:       >=1.10
+
+executable trees
+  main-is:             Main.hs
+  other-extensions:    DeriveFunctor
+  build-depends:       base >=4.8
+                     , containers
+                     , mtl
+                     , monad-loops
+  default-language:    Haskell2010
