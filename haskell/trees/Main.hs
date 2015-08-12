@@ -6,7 +6,6 @@ import GHC.Generics (Generic)
 
 import Prelude
 import Data.Sequence (ViewL(..))
-import Data.Foldable (toList)
 import Data.Monoid
 import qualified Data.Sequence as Seq
 import qualified Data.HashSet as Set
