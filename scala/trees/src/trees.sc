@@ -1,4 +1,3 @@
-
 sealed trait Tree
 
 case class Node[A](value: A, left: Tree, right: Tree) extends Tree
