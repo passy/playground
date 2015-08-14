@@ -18,8 +18,8 @@ def traverseDF[A](tree: Tree[A]): Seq[A] = tree match {
 
 def traverseBF[A](tree: Tree[A]): Seq[A] = tree match {
   case Empty => Seq()
-  case n@Node(_, _, _) =>
-    val queue = mutable.Queue[Tree[A]](n)
+  case node =>
+    val queue = mutable.Queue[Tree[A]](node)
     val visited = mutable.Set[Tree[A]]()
     val result = mutable.ListBuffer[A]()
 
@@ -27,7 +27,7 @@ def traverseBF[A](tree: Tree[A]): Seq[A] = tree match {
       queue.dequeue() match {
         case Empty => ()
         case n@Node(v, _, _) =>
-          n.children().filterNot { visited.contains } .foreach { queue.enqueue(_) }
+          n.children().filterNot { visited.contains }.foreach { queue.enqueue(_) }
 
           if (!visited.contains(n)) {
             visited.add(n)
