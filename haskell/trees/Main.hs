@@ -45,6 +45,14 @@ traverseBF node = flip evalState (Seq.singleton node, Set.empty) $
     -- Push this into the result
     return v
 
+traverseBF' :: Tree a -> [a]
+traverseBF' tree = go [tree]
+  where
+    go [] = []
+    go xs = fmap nval xs <> go (concatMap adjacentNodes xs)
+
+    nval (Node v _ _) = v
+
 createTree :: Tree Char
 createTree = Node 'A'
                 (Node 'B'
@@ -67,3 +75,5 @@ main = do
   print $ traverseDF createTree
   putStrLn "BFS:"
   print $ traverseBF createTree
+  putStrLn "BFS':"
+  print $ traverseBF' createTree
