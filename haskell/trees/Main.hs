@@ -53,10 +53,12 @@ createTree = Node 'A'
                 )
                 (Node 'E'
                     (Node 'F' Empty Empty)
-                    (Node 'G' Empty (Node 'H'
-                        (Node 'I' Empty Empty)
-                        Empty
-                    ))
+                    (Node 'G' Empty
+                        (Node 'H'
+                            (Node 'I' Empty Empty)
+                            Empty
+                        )
+                    )
                 )
 
 main :: IO ()
