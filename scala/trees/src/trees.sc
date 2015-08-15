@@ -1,8 +1,15 @@
 import scala.collection.mutable
 
-sealed trait Tree[+A]
-case object Empty extends Tree[Nothing]
+sealed trait Tree[+A] {
+  def fmap[B](f: A => B): Tree[B]
+}
+case object Empty extends Tree[Nothing] {
+  def fmap[B](f: Nothing => B) = Empty
+}
 case class Node[A](value: A, left: Tree[A], right: Tree[A]) extends Tree[A] {
+  def fmap[B](f: A => B) =
+    Node(f(value), left.fmap(f), right.fmap(f))
+
   def children(): Seq[Tree[A]] = this match {
     case Node(_, Empty, Empty) => Seq()
     case Node(_, l, Empty) => Seq(l)
@@ -57,6 +64,5 @@ val t: Node[Char] = Node('A',
   ),
   Empty
 )
-
 traverseDF(t)
 traverseBF(t)
