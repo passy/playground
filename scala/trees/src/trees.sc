@@ -1,20 +1,32 @@
+import scala.annotation.tailrec
 import scala.collection.mutable
+import scala.language.higherKinds
+
+trait Functor[F[_]] {
+  def fmap[A, B](f: A => B): F[A] => F[B]
+}
 
 sealed trait Tree[+A] {
-  def fmap[B](f: A => B): Tree[B]
+  def children(): Seq[Tree[A]]
 }
-case object Empty extends Tree[Nothing] {
-  def fmap[B](f: Nothing => B) = Empty
-}
-case class Node[A](value: A, left: Tree[A], right: Tree[A]) extends Tree[A] {
-  def fmap[B](f: A => B) =
-    Node(f(value), left.fmap(f), right.fmap(f))
 
-  def children(): Seq[Tree[A]] = this match {
+case object Empty extends Tree[Nothing] {
+  override def children(): Seq[Tree[Nothing]] = Seq()
+}
+
+case class Node[A](value: A, left: Tree[A], right: Tree[A]) extends Tree[A] {
+  override def children(): Seq[Tree[A]] = this match {
     case Node(_, Empty, Empty) => Seq()
     case Node(_, l, Empty) => Seq(l)
     case Node(_, Empty, r) => Seq(r)
     case Node(_, l, r) => Seq(l, r)
+  }
+}
+
+implicit object TreeFunctor extends Functor[Tree] {
+  override def fmap[A, B](f: (A) => B): (Tree[A]) => Tree[B] = (tree: Tree[A]) => tree match {
+    case Empty => Empty
+    case Node(v, l, r) => Node(f(v), fmap(f)(l), fmap(f)(r))
   }
 }
 
@@ -45,6 +57,20 @@ def traverseBF[A](tree: Tree[A]): Seq[A] = tree match {
     result.toSeq
 }
 
+def traverseBFPrime[A](tree: Tree[A]): Seq[A] = {
+  def nval(t: Tree[A]): A = t match {
+    case Node(v, _, _) => v
+  }
+
+  def go(trees: List[Tree[A]]): Seq[A] = trees match {
+    case Nil => List()
+    case ts =>
+      ts.map(nval) ++ go(ts.flatMap(_.children()))
+  }
+
+  go(List(tree))
+}
+
 val t: Node[Char] = Node('A',
   Node('B',
     Node('C',
@@ -64,5 +90,7 @@ val t: Node[Char] = Node('A',
   ),
   Empty
 )
+
 traverseDF(t)
 traverseBF(t)
+traverseBFPrime(t)
