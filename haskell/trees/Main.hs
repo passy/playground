@@ -7,6 +7,7 @@ import GHC.Generics (Generic)
 import Prelude
 import Data.Sequence (ViewL(..))
 import Data.Monoid
+import Criterion.Main
 import qualified Data.Sequence as Seq
 import qualified Data.HashSet as Set
 import Control.Monad.State
@@ -70,10 +71,8 @@ createTree = Node 'A'
                 )
 
 main :: IO ()
-main = do
-  putStrLn "DFS:"
-  print $ traverseDF createTree
-  putStrLn "BFS:"
-  print $ traverseBF createTree
-  putStrLn "BFS':"
-  print $ traverseBF' createTree
+main = defaultMain [
+    bgroup "BFS" [ bench "state" $ whnf traverseBF createTree
+                 , bench "pure" $ whnf traverseBF' createTree
+                 ]
+  ]
