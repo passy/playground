@@ -72,7 +72,8 @@ createTree = Node 'A'
 
 main :: IO ()
 main = defaultMain [
-    bgroup "BFS" [ bench "state" $ whnf traverseBF createTree
-                 , bench "pure" $ whnf traverseBF' createTree
-                 ]
+    bgroup "Traversal" [ bench "dfs pure" $ whnf traverseDF createTree
+                       , bench "bfs state" $ whnf traverseBF createTree
+                       , bench "bfs pure" $ whnf traverseBF' createTree
+                       ]
   ]
