@@ -1,12 +1,11 @@
 #!/usr/bin/env stack
--- stack --resolver lts-2.9 --install-ghc runghc --package turtle
+-- stack --resolver lts-3.7 --install-ghc runghc --package turtle
 {-# LANGUAGE OverloadedStrings #-}
 
 import Data.Text as T
 import Prelude hiding (FilePath)
 import Turtle
-import Data.Time.Format (formatTime)
-import System.Locale (defaultTimeLocale)
+import Data.Time.Format (formatTime, defaultTimeLocale)
 
 excludeList :: [Text]
 excludeList =
