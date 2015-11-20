@@ -1,8 +1,8 @@
 const Rx = require('rx');
 const deepcopy = require('deepcopy');
 
-const API_DURATION_MS = 3000;
-const DB_DURATION_MS = 1000;
+const API_DURATION_MS = 1000;
+const DB_DURATION_MS = 2000;
 
 const API = {
   fetchTvShow(id) {
@@ -29,6 +29,7 @@ const DB = {
     const showp = deepcopy(show);
     showp.from = 'DB\'';
     this.observable.onNext(showp);
+    this.observable.onCompleted();
   }
 };
 
