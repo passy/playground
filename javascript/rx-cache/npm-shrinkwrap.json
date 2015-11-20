@@ -1,5 +1,16 @@
 {
   "name": "rx-cache-example",
   "version": "1.0.0",
-  "dependencies": {}
+  "dependencies": {
+    "deepcopy": {
+      "version": "0.5.0",
+      "from": "deepcopy@>=0.5.0 <0.6.0",
+      "resolved": "https://registry.npmjs.org/deepcopy/-/deepcopy-0.5.0.tgz"
+    },
+    "rx": {
+      "version": "4.0.7",
+      "from": "rx@*",
+      "resolved": "https://registry.npmjs.org/rx/-/rx-4.0.7.tgz"
+    }
+  }
 }
