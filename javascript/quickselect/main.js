@@ -9,7 +9,6 @@ const swap = (arr, a, b) => {
   const tmp = arr[a];
   arr[a] = arr[b];
   arr[b] = tmp;
-  console.log('swap', a, b);
 };
 
 const partition = (arr, lo, hi) => {
@@ -35,19 +34,19 @@ const quicksort = (arr, lo, hi) => {
 };
 
 const rselect = (arr, order) => {
-  const go = (lo, hi, o) => {
-    if (hi - lo === 0) return arr[lo];
+  const go = (lo, hi) => {
+    if (hi <= lo) return arr[lo];
     const p = partition(arr, lo, hi);
-    if (p === o) return arr[o];
-    if (p > o) return go(lo, p - 1, o);
-    if (p < o) return go(p + 1, hi, p + o);
+    if (p === order) return arr[order];
+    if (p > order) return go(lo, p - 1);
+    if (p < order) return go(p + 1, hi);
   };
 
   return go(0, arr.length - 1, order);
 };
 
 const arr = [5, 3, 10, 7, 9, 2, 1];
-const o = quicksort(arr, 0, arr.length - 1);
+const o = rselect(arr, 5);
 
 console.log('o =', o);
 console.log('arr =', arr);
