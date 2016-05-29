@@ -2,7 +2,6 @@
 
 module Main where
 
-import Control.Monad (void)
 import qualified Text.Megaparsec as M
 import qualified Text.Megaparsec.Text as M
 import qualified System.Environment as Env
@@ -10,11 +9,7 @@ import qualified System.Environment as Env
 type Tag = (String, String)
 
 tagP :: M.Parser Tag
-tagP = do
-  void $ M.char '#'
-  key <- M.someTill M.printChar (M.char ':')
-  val <- M.someTill M.printChar M.eol
-  return (key, val)
+tagP = M.char '#' *> ((,) <$> M.someTill M.printChar (M.char ':') <*> M.someTill M.printChar M.eol)
 
 parser :: M.Parser [Tag]
 parser = M.many tagP
