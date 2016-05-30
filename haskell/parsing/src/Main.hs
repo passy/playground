@@ -2,6 +2,8 @@
 
 module Main where
 
+import qualified Data.Text            as T
+import qualified Data.Text.IO         as TIO
 import qualified System.Environment   as Env
 import qualified Text.Megaparsec      as M
 import qualified Text.Megaparsec.Text as M
@@ -20,8 +22,11 @@ data Segment = Tags [Tag] | URL String
 parser :: M.Parser Segment
 parser = (Tags <$> M.many tagP) M.<|> (URL <$> urlP)
 
+parseFromFile :: M.Parsec e T.Text a -> FilePath -> IO (Either (M.ParseError (M.Token T.Text) e) a)
+parseFromFile p fp = M.parse p fp <$> TIO.readFile fp
+
 main :: IO ()
 main = do
   fname <- head <$> Env.getArgs
-  res <- M.parseFromFile (parser <* M.eof) fname
+  res <- parseFromFile (parser <* M.eof) fname
   print res
