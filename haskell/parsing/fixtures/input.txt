@@ -1,5 +1,5 @@
 #foo:bar
 #faz:baz
 https://example.com
-#foo:boob
+#foo:beep
 https://example.net
