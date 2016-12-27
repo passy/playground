@@ -1,0 +1,27 @@
+name:                rec-sample
+version:             0.1.0
+synopsis:            Playing around with recursion schemes.
+description:         Please see README.md
+homepage:            https://github.com/passy/playground/haskell/rec-sample
+license:             BSD3
+author:              Pascal Hartig
+maintainer:          phartig@rdrei.net
+copyright:           2016 Pascal Hartig
+category:            Acme
+extra-source-files:
+- README.md
+
+default-extensions:
+- NoImplicitPrelude
+- OverloadedStrings
+
+dependencies:
+  - base >= 4.7 && < 5
+  - protolude
+  - recursion-schemes
+  - text
+
+executables:
+  rec-sample:
+    source-dirs:      src
+    main:             Main.hs
