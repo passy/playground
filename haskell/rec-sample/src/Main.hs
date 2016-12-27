@@ -21,14 +21,13 @@ thread = (Fix .) . ThreadF
 end :: Text -> Tweet
 end = Fix . EndF
 
-replaceTweet :: Text -> Text -> Tweet -> Tweet
-replaceTweet needle replacement = cata alg where
-  replace = T.replace needle replacement
-  alg (EndF t) = end $ replace t
-  alg (ThreadF t tw) = thread (replace t) tw
+mapTweetText :: (Text -> Text) -> Tweet -> Tweet
+mapTweetText f = cata alg where
+  alg (EndF t) = end $ f t
+  alg (ThreadF t tw) = thread (f t) tw
 
 main :: IO ()
 main = do
   let t = thread "I do(n)'t know how to use parentheses." (end "I wish I could edit Tweets.")
-  let t' = replaceTweet "do(n)'t" "do(n't)" t
+  let t' = mapTweetText (T.replace "do(n)'t" "do(n't)") t
   putStrLn @Text "Whatever."
