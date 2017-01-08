@@ -16,6 +16,10 @@ unFix (Fix f) = f
 cata :: forall f a. Functor f => (f a -> a) -> Fix f -> a
 cata alg = unFix >>> map (cata alg) >>> alg
 
+-- Point-ful version.
+cata' :: forall f a. Functor f => (f a -> a) -> Fix f -> a
+cata' alg c = alg (map (cata alg) (unFix c))
+
 -- | A pattern functor for a cons-list.
 data ListF a b = Nil | Cons a b
 
@@ -47,5 +51,17 @@ algSum (Cons n acc) = n + acc
 
 main :: forall e. Eff (console :: CONSOLE | e) Unit
 main = do
-  log <<< show $ cata algSum (Fix Nil)
+  let res = cata algSum (Fix Nil)
+  --   cata algSum (Fix Nil)
+  -- = algSum (map (cata algSum) (unFix (Fix Nil)))
+  --                              ^^^^^^^^^^^^^^^
+  --                      forall a. ListF a (Fix (ListF a))
+  -- = algSum (map (cata algSum) (unFix (Fix Nil)))
+  --           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  --                     ListF Int Int
+  -- = algSum Nil
+  -- = 0
+  --
+  -- map undefined Nil = Nil
+  log <<< show $ res
   log <<< show $ cata algSum lst
