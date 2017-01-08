@@ -8,13 +8,13 @@ import Control.Monad.Eff.Console (CONSOLE, log)
 newtype Fix f = Fix (f (Fix f))
 
 -- | Peel back one layer of recursion.
-unfix :: forall f. Fix f -> f (Fix f)
-unfix (Fix f) = f
+unFix :: forall f. Fix f -> f (Fix f)
+unFix (Fix f) = f
 
 -- | A simpler definition of a catamorphism, without genericizing this
 -- to Base as it's done in `recursion-schemes`.
 cata :: forall f a. Functor f => (f a -> a) -> Fix f -> a
-cata alg = unfix >>> map (cata alg) >>> alg
+cata alg = unFix >>> map (cata alg) >>> alg
 
 -- | A pattern functor for a cons-list.
 data ListF a b = Nil | Cons a b
@@ -47,4 +47,5 @@ algSum (Cons n acc) = n + acc
 
 main :: forall e. Eff (console :: CONSOLE | e) Unit
 main = do
+  log <<< show $ cata algSum (Fix Nil)
   log <<< show $ cata algSum lst
