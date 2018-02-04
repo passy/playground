@@ -14,13 +14,17 @@ collapse t =
          Node a l       Empty -> a : collapse l ++ [-1]
          Node a l       r     -> a : collapse l ++ collapse r
 
-expand :: [Int] -> IntTree
-expand []   = Empty
-expand [-1] = Empty
-expand (a:l:r:as) | l == -1 && r == -1 = Node a Empty Empty
-                  | l == -1 = Node a Empty (expand (r:as))
-                  | r == -1 = Node a (Node l Empty Empty) Empty
-                  | otherwise = Node a 
+expand :: [Int] -> (IntTree, [Int])
+expand []   = (Empty, [])
+expand [-1] = (Empty, [])
+expand (a:l:r:as) | l == -1 && r == -1 = (Node a Empty Empty, as)
+                  | l == -1 =
+                    let (r', as') = expand (r:as)
+                    in (Node a Empty r', as')
+                  | otherwise =
+                    let (l', as') = expand (l:r:as)
+                        (r', as'') = expand as'
+                    in (Node a l' r', as'')
 
 main = 
     --         1
@@ -31,7 +35,7 @@ main =
     --               \
     --                5
     --
-    let tree :: Tree Int = Node 1 (Empty) (Node 2 (Node 3 Empty Empty) (Node 4 Empty (Node 5 Empty Empty)))
+    let tree :: Tree Int = Node 1 Empty (Node 2 (Node 3 Empty Empty) (Node 4 Empty (Node 5 Empty Empty)))
         c = collapse tree
         e = expand c
     in do
