@@ -5,7 +5,7 @@ import Prelude
 import Data.Maybe (isNothing)
 
 data Tree a = Empty | Node a (Tree a) (Tree a)
-    deriving Show
+    deriving (Show, Eq)
 
 type IntTree = Tree Int
 
