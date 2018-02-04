@@ -20,12 +20,7 @@ collapse t =
 expand :: [Maybe a] -> (Tree a, [Maybe a])
 expand []        = (Empty, [])
 expand [Nothing] = (Empty, [])
-expand (Just a:l:r:as) | isNothing l && isNothing r = (Node a Empty Empty, as)
-                       | isNothing l =
-                            let (r', as') = expand (r:as)
-                            in (Node a Empty r', as')
-                       | otherwise =
-                            let (l', as') = expand (l:r:as)
-                                (r', as'') = expand as'
-                            in (Node a l' r', as'')
-expand as        = (Empty, as)
+expand (Just a:l:r:as) = let (l', as') = expand (l:r:as)
+                             (r', as'') = expand as'
+                         in (Node a l' r', as'')
+expand (a:as)          = (Empty, as)
